@@ -1,7 +1,7 @@
 {
   "name": "book-api",
   "version": "1.0.0",
-  "description": "REST API de gestion de livres avec authentification JWT (Node.js, Express, MongoDB)",
+  "description": "REST API de gestion de livres avec authentification JWT (Node.js, Express, SQL via Sequelize)",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -25,7 +25,8 @@
     "helmet": "^7.0.0",
     "joi": "^17.10.0",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.0.0"
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"

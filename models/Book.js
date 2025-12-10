@@ -1,45 +1,45 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const bookSchema = new mongoose.Schema(
+const Book = sequelize.define(
+  'Book',
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     title: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     author: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     description: {
-      type: String,
-      trim: true,
+      type: DataTypes.TEXT,
     },
     year: {
-      type: Number,
-      min: 0,
-      max: new Date().getFullYear(),
+      type: DataTypes.INTEGER,
     },
     genre: {
-      type: String,
-      trim: true,
+      type: DataTypes.STRING,
     },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    ownerId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
+    likesCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
   },
   {
+    tableName: 'books',
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model('Book', bookSchema);
+module.exports = Book;
