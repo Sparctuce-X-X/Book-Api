@@ -130,8 +130,8 @@ module.exports = {
         return res.status(404).json({ message: 'Livre non trouvé' });
       }
 
-      // Vérification : seul le propriétaire peut modifier
-      if (book.ownerId !== req.user.id) {
+      // Vérification : seul le propriétaire OU un admin peut modifier
+      if (book.ownerId !== req.user.id && req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres livres' });
       }
 
@@ -162,8 +162,8 @@ module.exports = {
         return res.status(404).json({ message: 'Livre non trouvé' });
       }
 
-      // Vérification : seul le propriétaire peut supprimer
-      if (book.ownerId !== req.user.id) {
+      // Vérification : seul le propriétaire OU un admin peut supprimer
+      if (book.ownerId !== req.user.id && req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Vous ne pouvez supprimer que vos propres livres' });
       }
 
