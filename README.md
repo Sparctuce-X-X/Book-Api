@@ -39,6 +39,16 @@ npm run dev
 
 Le serveur démarre sur `http://localhost:4000`.
 
+## 📖 Documentation Swagger
+
+Une documentation interactive est disponible à l'adresse :
+
+```
+http://localhost:4000/api-docs
+```
+
+Vous pouvez y tester toutes les routes directement depuis le navigateur.
+
 ## 🔐 Authentification
 
 L'API utilise des tokens JWT. Pour accéder aux routes protégées, ajoutez le header :
