@@ -1,6 +1,16 @@
 // Middleware centralisé de gestion des erreurs
+const logger = require('../config/logger');
+
 module.exports = (err, req, res, next) => {
-  console.error(err); // en prod on utiliserait un logger
+  // Logger l'erreur avec les détails de la requête
+  logger.error('Erreur dans la requête', {
+    error: err.message,
+    stack: err.stack,
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    user: req.user?.id || 'non authentifié',
+  });
 
   // Gestion des erreurs Sequelize
   if (err.name === 'SequelizeValidationError') {

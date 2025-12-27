@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const logger = require('./logger');
 
 // Utilisation de SQLite pour simplifier l'installation (fichier local)
 // Le chemin du fichier peut être configuré via la variable d'environnement DB_FILE
@@ -11,12 +12,13 @@ const sequelize = new Sequelize({
 const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Base de données SQL connectée');
+    logger.info('Base de données SQL connectée avec succès');
 
     // Synchronisation des modèles avec la base (crée les tables si elles n'existent pas)
     await sequelize.sync();
+    logger.info('Modèles synchronisés avec la base de données');
   } catch (error) {
-    console.error('Erreur de connexion à la base de données', error.message);
+    logger.error('Erreur de connexion à la base de données', { error: error.message, stack: error.stack });
     process.exit(1);
   }
 };

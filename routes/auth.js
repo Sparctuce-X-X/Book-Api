@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authController = require('../controllers/authController');
+const { authLimiter } = require('../middlewares/rateLimiter');
 
 /**
  * @openapi
@@ -33,7 +34,7 @@ const authController = require('../controllers/authController');
  *       409:
  *         description: Email déjà utilisé
  */
-router.post('/register', authController.register);
+router.post('/register', authLimiter, authController.register);
 
 /**
  * @openapi
@@ -68,6 +69,6 @@ router.post('/register', authController.register);
  *       401:
  *         description: Identifiants invalides
  */
-router.post('/login', authController.login);
+router.post('/login', authLimiter, authController.login);
 
 module.exports = router;

@@ -1,8 +1,17 @@
 require('dotenv').config();
+const logger = require('./config/logger');
+const fs = require('fs');
+const path = require('path');
+
+// Créer le dossier logs s'il n'existe pas
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
 
 // Vérification des variables d'environnement critiques
 if (!process.env.JWT_SECRET) {
-  console.error('ERREUR: JWT_SECRET n\'est pas défini dans le fichier .env');
+  logger.error('ERREUR: JWT_SECRET n\'est pas défini dans le fichier .env');
   process.exit(1);
 }
 
@@ -16,9 +25,13 @@ const connectDatabase = require('./config/database');
 // Charger les associations Sequelize
 require('./models');
 
+// Logger au démarrage
+logger.info('Démarrage de l\'application Book API');
+
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
 const errorHandler = require('./middlewares/errorHandler');
+const { generalLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
 
@@ -26,6 +39,9 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Rate limiting global
+app.use(generalLimiter);
 
 // Connexion à la base de données
 connectDatabase();
@@ -62,7 +78,13 @@ app.get('/health', (req, res) => {
 // Middleware centralisé de gestion des erreurs
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export de l'app pour les tests
+module.exports = app;
+
+// Démarrer le serveur seulement si le fichier est exécuté directement
+if (require.main === module) {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    logger.info(`Serveur démarré sur le port ${PORT}`);
+  });
+}

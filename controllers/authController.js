@@ -1,4 +1,3 @@
-// Les vraies fonctions (register, login) seront implémentées juste après
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
