@@ -1,4 +1,11 @@
 require('dotenv').config();
+
+// Vérification des variables d'environnement critiques
+if (!process.env.JWT_SECRET) {
+  console.error('ERREUR: JWT_SECRET n\'est pas défini dans le fichier .env');
+  process.exit(1);
+}
+
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -6,6 +13,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
 const connectDatabase = require('./config/database');
+// Charger les associations Sequelize
+require('./models');
+
 const authRoutes = require('./routes/auth');
 const bookRoutes = require('./routes/books');
 const errorHandler = require('./middlewares/errorHandler');

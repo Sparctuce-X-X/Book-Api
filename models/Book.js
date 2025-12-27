@@ -29,6 +29,11 @@ const Book = sequelize.define(
     ownerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
     likesCount: {
       type: DataTypes.INTEGER,

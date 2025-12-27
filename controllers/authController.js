@@ -7,14 +7,30 @@ const User = require('../models/User');
 
 // Schémas de validation Joi
 const registerSchema = Joi.object({
-  name: Joi.string().min(2).max(100).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(8).required(),
+  name: Joi.string().min(2).max(100).trim().required().messages({
+    'string.min': 'Le nom doit contenir au moins 2 caractères',
+    'string.max': 'Le nom ne peut pas dépasser 100 caractères',
+    'any.required': 'Le nom est requis',
+  }),
+  email: Joi.string().email().trim().lowercase().required().messages({
+    'string.email': 'L\'email doit être une adresse email valide',
+    'any.required': 'L\'email est requis',
+  }),
+  password: Joi.string().min(8).max(128).required().messages({
+    'string.min': 'Le mot de passe doit contenir au moins 8 caractères',
+    'string.max': 'Le mot de passe ne peut pas dépasser 128 caractères',
+    'any.required': 'Le mot de passe est requis',
+  }),
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(8).required(),
+  email: Joi.string().email().trim().lowercase().required().messages({
+    'string.email': 'L\'email doit être une adresse email valide',
+    'any.required': 'L\'email est requis',
+  }),
+  password: Joi.string().required().messages({
+    'any.required': 'Le mot de passe est requis',
+  }),
 });
 
 const generateToken = (user) => {
@@ -25,7 +41,7 @@ const generateToken = (user) => {
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN ,
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
   });
 };
 
@@ -36,7 +52,7 @@ module.exports = {
 
       if (error) {
         return res.status(400).json({
-          message: 'le mot de passe ou l\'email est invalide',
+          message: 'Données invalides',
           details: error.details.map((d) => d.message),
         });
       }

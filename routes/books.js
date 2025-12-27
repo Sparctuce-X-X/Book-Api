@@ -3,6 +3,7 @@ const router = express.Router();
 
 const bookController = require('../controllers/bookController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const validateIdParam = require('../middlewares/validateParams');
 
 // Toutes les routes livres sont protégées par JWT
 router.use(authMiddleware);
@@ -59,12 +60,27 @@ router.post('/', bookController.createBook);
  *         schema:
  *           type: integer
  *         description: Filtrer par année
- *       - in: query
- *         name: author
- *         schema:
- *           type: string
- *         description: Filtrer par auteur
- *     responses:
+     *       - in: query
+     *         name: author
+     *         schema:
+     *           type: string
+     *         description: Filtrer par auteur
+     *       - in: query
+     *         name: page
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           default: 1
+     *         description: Numéro de page
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           maximum: 100
+     *           default: 10
+     *         description: Nombre d'éléments par page
+     *     responses:
  *       200:
  *         description: Liste des livres
  *         content:
@@ -74,9 +90,22 @@ router.post('/', bookController.createBook);
  *               properties:
  *                 message:
  *                   type: string
- *                 count:
- *                   type: integer
- *                 books:
+     *                 pagination:
+     *                   type: object
+     *                   properties:
+     *                     page:
+     *                       type: integer
+     *                     limit:
+     *                       type: integer
+     *                     total:
+     *                       type: integer
+     *                     totalPages:
+     *                       type: integer
+     *                     hasNext:
+     *                       type: boolean
+     *                     hasPrev:
+     *                       type: boolean
+     *                 books:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Book'
@@ -115,7 +144,7 @@ router.get('/', bookController.getBooks);
  *       404:
  *         description: Livre non trouvé
  */
-router.get('/:id', bookController.getBookById);
+router.get('/:id', validateIdParam, bookController.getBookById);
 
 /**
  * @openapi
@@ -150,7 +179,7 @@ router.get('/:id', bookController.getBookById);
  *       404:
  *         description: Livre non trouvé
  */
-router.put('/:id', bookController.updateBook);
+router.put('/:id', validateIdParam, bookController.updateBook);
 
 /**
  * @openapi
@@ -177,7 +206,7 @@ router.put('/:id', bookController.updateBook);
  *       404:
  *         description: Livre non trouvé
  */
-router.delete('/:id', bookController.deleteBook);
+router.delete('/:id', validateIdParam, bookController.deleteBook);
 
 /**
  * @openapi
@@ -211,6 +240,6 @@ router.delete('/:id', bookController.deleteBook);
  *       404:
  *         description: Livre non trouvé
  */
-router.post('/:id/like', bookController.likeBook);
+router.post('/:id/like', validateIdParam, bookController.likeBook);
 
 module.exports = router;

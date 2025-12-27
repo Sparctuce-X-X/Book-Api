@@ -7,7 +7,12 @@ const bookSchema = Joi.object({
   title: Joi.string().min(1).max(255).required(),
   author: Joi.string().min(1).max(255).required(),
   description: Joi.string().max(2000).allow('', null),
-  year: Joi.number().integer().min(0).max(new Date().getFullYear()),
+  year: Joi.number().integer().min(0).max(new Date().getFullYear()).messages({
+    'number.base': 'L\'année doit être un nombre',
+    'number.integer': 'L\'année doit être un entier',
+    'number.min': 'L\'année doit être positive',
+    'number.max': `L\'année ne peut pas dépasser ${new Date().getFullYear()}`,
+  }),
   genre: Joi.string().max(100).allow('', null),
 });
 
@@ -16,7 +21,12 @@ const bookUpdateSchema = Joi.object({
   title: Joi.string().min(1).max(255),
   author: Joi.string().min(1).max(255),
   description: Joi.string().max(2000).allow('', null),
-  year: Joi.number().integer().min(0).max(new Date().getFullYear()),
+  year: Joi.number().integer().min(0).max(new Date().getFullYear()).messages({
+    'number.base': 'L\'année doit être un nombre',
+    'number.integer': 'L\'année doit être un entier',
+    'number.min': 'L\'année doit être positive',
+    'number.max': `L\'année ne peut pas dépasser ${new Date().getFullYear()}`,
+  }),
   genre: Joi.string().max(100).allow('', null),
 }).min(1); // Au moins un champ doit être fourni
 
@@ -55,6 +65,7 @@ module.exports = {
   // READ ALL - Lister tous les livres
   // GET /books
   // Supporte les filtres : ?genre=SciFi&year=2023&author=Asimov
+  // Supporte la pagination : ?page=1&limit=10
   // ============================================
   getBooks: async (req, res, next) => {
     try {
@@ -65,20 +76,46 @@ module.exports = {
         where.genre = req.query.genre;
       }
       if (req.query.year) {
-        where.year = parseInt(req.query.year, 10);
+        const year = parseInt(req.query.year, 10);
+        if (!isNaN(year)) {
+          where.year = year;
+        }
       }
       if (req.query.author) {
         where.author = req.query.author;
       }
 
-      const books = await Book.findAll({
+      // Pagination
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      // Validation de la pagination
+      if (page < 1 || limit < 1 || limit > 100) {
+        return res.status(400).json({
+          message: 'Paramètres de pagination invalides. page >= 1, limit >= 1 et limit <= 100',
+        });
+      }
+
+      const { count, rows: books } = await Book.findAndCountAll({
         where,
         order: [['createdAt', 'DESC']], // Les plus récents en premier
+        limit,
+        offset,
       });
+
+      const totalPages = Math.ceil(count / limit);
 
       return res.status(200).json({
         message: 'Liste des livres',
-        count: books.length,
+        pagination: {
+          page,
+          limit,
+          total: count,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
         books,
       });
     } catch (err) {
