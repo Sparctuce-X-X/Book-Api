@@ -124,6 +124,89 @@ describe('Routes d\'authentification', () => {
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('message', 'Identifiants invalides');
     });
+
+    it('devrait retourner 400 si les données sont invalides', async () => {
+      const response = await request(app)
+        .post('/auth/login')
+        .send({
+          email: 'invalid-email',
+          password: '',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('message', 'Données invalides');
+    });
+
+    it('devrait retourner 400 si l\'email est manquant', async () => {
+      const response = await request(app)
+        .post('/auth/login')
+        .send({
+          password: 'Password123',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('devrait retourner 400 si le mot de passe est manquant', async () => {
+      const response = await request(app)
+        .post('/auth/login')
+        .send({
+          email: 'test@example.com',
+        });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('POST /auth/register - Cas limites', () => {
+    it('devrait rejeter un mot de passe sans majuscule', async () => {
+      const response = await request(app)
+        .post('/auth/register')
+        .send({
+          name: 'Test User',
+          email: 'test@example.com',
+          password: 'password123', // Pas de majuscule
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('details');
+    });
+
+    it('devrait rejeter un mot de passe sans chiffre', async () => {
+      const response = await request(app)
+        .post('/auth/register')
+        .send({
+          name: 'Test User',
+          email: 'test@example.com',
+          password: 'Password', // Pas de chiffre
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('devrait rejeter un nom trop long', async () => {
+      const response = await request(app)
+        .post('/auth/register')
+        .send({
+          name: 'A'.repeat(101), // Plus de 100 caractères
+          email: 'test@example.com',
+          password: 'Password123',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('devrait normaliser l\'email en minuscules', async () => {
+      const response = await request(app)
+        .post('/auth/register')
+        .send({
+          name: 'Test User',
+          email: 'TEST@EXAMPLE.COM',
+          password: 'Password123',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.user.email).toBe('test@example.com');
+    });
   });
 });
-
