@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
+/**
+ * Modèle User (Utilisateur)
+ * Représente un utilisateur de l'application avec authentification
+ */
 const User = sequelize.define(
   'User',
   {

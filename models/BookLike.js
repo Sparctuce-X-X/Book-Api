@@ -1,6 +1,11 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
+/**
+ * Modèle BookLike (Like de livre)
+ * Table de liaison pour les likes des utilisateurs sur les livres
+ * Contraint unique sur (userId, bookId) pour éviter les doubles likes
+ */
 const BookLike = sequelize.define(
   'BookLike',
   {

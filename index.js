@@ -9,8 +9,8 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Vérification des variables d'environnement critiques
-if (!process.env.JWT_SECRET) {
+// Vérification des variables d'environnement critiques (sauf en mode test)
+if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'test') {
   logger.error('ERREUR: JWT_SECRET n\'est pas défini dans le fichier .env');
   process.exit(1);
 }
@@ -43,8 +43,10 @@ app.use(express.json());
 // Rate limiting global
 app.use(generalLimiter);
 
-// Connexion à la base de données
-connectDatabase();
+// Connexion à la base de données (sauf en mode test où c'est géré par les tests)
+if (process.env.NODE_ENV !== 'test') {
+  connectDatabase();
+}
 
 // Documentation Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

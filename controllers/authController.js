@@ -1,43 +1,14 @@
-const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
+const { registerSchema, loginSchema } = require('../schemas/authSchemas');
 
-// Schémas de validation Joi
-const registerSchema = Joi.object({
-  name: Joi.string().min(2).max(100).trim().required().messages({
-    'string.min': 'Le nom doit contenir au moins 2 caractères',
-    'string.max': 'Le nom ne peut pas dépasser 100 caractères',
-    'any.required': 'Le nom est requis',
-  }),
-  email: Joi.string().email().trim().lowercase().required().messages({
-    'string.email': 'L\'email doit être une adresse email valide',
-    'any.required': 'L\'email est requis',
-  }),
-  password: Joi.string()
-    .min(8)
-    .max(128)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .required()
-    .messages({
-      'string.min': 'Le mot de passe doit contenir au moins 8 caractères',
-      'string.max': 'Le mot de passe ne peut pas dépasser 128 caractères',
-      'string.pattern.base': 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre',
-      'any.required': 'Le mot de passe est requis',
-    }),
-});
-
-const loginSchema = Joi.object({
-  email: Joi.string().email().trim().lowercase().required().messages({
-    'string.email': 'L\'email doit être une adresse email valide',
-    'any.required': 'L\'email est requis',
-  }),
-  password: Joi.string().required().messages({
-    'any.required': 'Le mot de passe est requis',
-  }),
-});
-
+/**
+ * Génère un token JWT pour un utilisateur
+ * @param {Object} user - L'utilisateur pour lequel générer le token
+ * @returns {string} Le token JWT signé
+ */
 const generateToken = (user) => {
   const payload = {
     id: user.id,
@@ -51,9 +22,14 @@ const generateToken = (user) => {
 };
 
 module.exports = {
+  /**
+   * Inscription d'un nouvel utilisateur
+   * POST /auth/register
+   */
   register: async (req, res, next) => {
     try {
-      const { error, value } = registerSchema.validate(req.body, { abortEarly: false }); //abortEarly: false permet de retourner tous les erreurs au lieu de la première
+      // abortEarly: false permet de retourner toutes les erreurs au lieu de la première
+      const { error, value } = registerSchema.validate(req.body, { abortEarly: false });
 
       if (error) {
         return res.status(400).json({
@@ -94,7 +70,10 @@ module.exports = {
     }
   },
 
-  
+  /**
+   * Connexion d'un utilisateur
+   * POST /auth/login
+   */
   login: async (req, res, next) => {
     try {
       const { error, value } = loginSchema.validate(req.body, { abortEarly: false });

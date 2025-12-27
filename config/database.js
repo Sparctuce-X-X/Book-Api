@@ -3,9 +3,12 @@ const logger = require('./logger');
 
 // Utilisation de SQLite pour simplifier l'installation (fichier local)
 // Le chemin du fichier peut être configuré via la variable d'environnement DB_FILE
+// En mode test, utiliser une base de données en mémoire pour les tests
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: process.env.DB_FILE || 'database.sqlite',
+  storage: process.env.NODE_ENV === 'test' 
+    ? ':memory:' 
+    : (process.env.DB_FILE || 'database.sqlite'),
   logging: false,
 });
 
@@ -16,6 +19,12 @@ const connectDatabase = async () => {
 
     // En développement, utiliser sync() pour faciliter le développement
     // En production, utiliser les migrations (voir package.json scripts)
+    // En test, ne pas synchroniser automatiquement (géré par les tests)
+    if (process.env.NODE_ENV === 'test') {
+      logger.info('Mode test : la synchronisation sera gérée par les tests');
+      return;
+    }
+
     if (process.env.NODE_ENV === 'production') {
       logger.info('Mode production : utilisez les migrations pour créer les tables');
       // En production, on suppose que les migrations ont été exécutées
@@ -33,7 +42,11 @@ const connectDatabase = async () => {
     }
   } catch (error) {
     logger.error('Erreur de connexion à la base de données', { error: error.message, stack: error.stack });
-    process.exit(1);
+    // Ne pas quitter le processus en mode test
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 

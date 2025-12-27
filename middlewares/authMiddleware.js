@@ -1,5 +1,10 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * Middleware d'authentification JWT
+ * Vérifie la présence et la validité du token JWT dans les headers
+ * Ajoute l'utilisateur décodé à req.user (contient id, email, role)
+ */
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -11,7 +16,8 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { id, email, role }
+    // Ajouter l'utilisateur décodé à la requête (contient id, email, role)
+    req.user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Token invalide ou expiré' });

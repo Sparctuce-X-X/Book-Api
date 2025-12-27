@@ -1,4 +1,7 @@
-// Middleware pour valider que les paramètres d'URL sont des entiers valides
+/**
+ * Middleware pour valider que les paramètres d'URL sont des entiers valides
+ * Vérifie que l'ID est un entier positif et le parse automatiquement
+ */
 const validateIdParam = (req, res, next) => {
   const { id } = req.params;
 

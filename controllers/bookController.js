@@ -1,35 +1,7 @@
 // CRUD complet pour les livres
-const Joi = require('joi');
 const Book = require('../models/Book');
 const BookLike = require('../models/BookLike');
-
-// Schéma de validation pour créer un livre
-const bookSchema = Joi.object({
-  title: Joi.string().min(1).max(255).required(),
-  author: Joi.string().min(1).max(255).required(),
-  description: Joi.string().max(2000).allow('', null),
-  year: Joi.number().integer().min(0).max(new Date().getFullYear()).messages({
-    'number.base': 'L\'année doit être un nombre',
-    'number.integer': 'L\'année doit être un entier',
-    'number.min': 'L\'année doit être positive',
-    'number.max': `L\'année ne peut pas dépasser ${new Date().getFullYear()}`,
-  }),
-  genre: Joi.string().max(100).allow('', null),
-});
-
-// Schéma pour la mise à jour (tous les champs optionnels)
-const bookUpdateSchema = Joi.object({
-  title: Joi.string().min(1).max(255),
-  author: Joi.string().min(1).max(255),
-  description: Joi.string().max(2000).allow('', null),
-  year: Joi.number().integer().min(0).max(new Date().getFullYear()).messages({
-    'number.base': 'L\'année doit être un nombre',
-    'number.integer': 'L\'année doit être un entier',
-    'number.min': 'L\'année doit être positive',
-    'number.max': `L\'année ne peut pas dépasser ${new Date().getFullYear()}`,
-  }),
-  genre: Joi.string().max(100).allow('', null),
-}).min(1); // Au moins un champ doit être fourni
+const { bookSchema, bookUpdateSchema } = require('../schemas/bookSchemas');
 
 module.exports = {
   // ============================================
@@ -48,9 +20,10 @@ module.exports = {
       }
 
       // req.user est défini par authMiddleware (contient id, email, role)
+      // Le livre appartient à l'utilisateur connecté
       const book = await Book.create({
         ...value,
-        ownerId: req.user.id, // Le livre appartient à l'utilisateur connecté
+        ownerId: req.user.id,
       });
 
       return res.status(201).json({
@@ -98,9 +71,10 @@ module.exports = {
         });
       }
 
+      // Les plus récents en premier
       const { count, rows: books } = await Book.findAndCountAll({
         where,
-        order: [['createdAt', 'DESC']], // Les plus récents en premier
+        order: [['createdAt', 'DESC']],
         limit,
         offset,
       });
@@ -173,7 +147,6 @@ module.exports = {
         return res.status(403).json({ message: 'Vous ne pouvez modifier que vos propres livres' });
       }
 
-      // Mise à jour des champs
       await book.update(value);
 
       return res.status(200).json({
@@ -250,7 +223,7 @@ module.exports = {
         bookId: id,
       });
 
-      // Incrémenter le compteur de likes
+      // Incrémenter le compteur de likes du livre
       book.likesCount += 1;
       await book.save();
 
@@ -259,7 +232,7 @@ module.exports = {
         likesCount: book.likesCount,
       });
     } catch (err) {
-      // Gérer l'erreur de contrainte unique (au cas où)
+      // Gérer l'erreur de contrainte unique (protection supplémentaire)
       if (err.name === 'SequelizeUniqueConstraintError') {
         return res.status(409).json({
           message: 'Vous avez déjà liké ce livre',

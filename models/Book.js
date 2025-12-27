@@ -1,6 +1,10 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
+/**
+ * Modèle Book (Livre)
+ * Représente un livre dans l'application
+ */
 const Book = sequelize.define(
   'Book',
   {
