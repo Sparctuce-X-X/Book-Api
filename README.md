@@ -15,7 +15,7 @@ API REST complète de gestion de livres avec authentification JWT, développée 
 - 📖 **CRUD complet** : Création, lecture, mise à jour et suppression de livres
 - 🔍 **Filtres avancés** : Recherche par genre, année, auteur
 - 📄 **Pagination** : Navigation efficace dans les grandes listes
-- ❤️ **Système de likes** : Possibilité de liker des livres
+- ❤️ **Système de likes** : Possibilité de liker des livres (prévention des doubles likes)
 - 🛡️ **Sécurité renforcée** : Rate limiting, validation, logging
 - 📊 **Tests complets** : Tests unitaires et d'intégration avec couverture de code
 - 📖 **Documentation Swagger** : Documentation interactive de l'API
@@ -235,6 +235,7 @@ L'API implémente plusieurs mesures de sécurité :
 
 - **JWT (JSON Web Tokens)** : Tokens signés avec expiration configurable
 - **Hashage des mots de passe** : Utilisation de bcrypt avec 10 rounds
+- **Validation de complexité** : Les mots de passe doivent contenir au moins une minuscule, une majuscule et un chiffre
 - **Système de rôles** : Permissions granulaires (user/admin)
 - **Protection des routes** : Middleware d'authentification sur toutes les routes sensibles
 
@@ -286,12 +287,19 @@ npm test
 npm run test:watch
 ```
 
+### Migrations de base de données
+
+```bash
+# Exécuter les migrations (créer les tables)
+npm run migrate
+```
+
 ### Résultats actuels
 
-- ✅ **36 tests** (tous passent)
-- 📊 **Couverture globale** : 79.54%
-- 🧪 **Tests unitaires** : 12 tests (controllers)
-- 🔗 **Tests d'intégration** : 24 tests (routes)
+- ✅ **50 tests** (tous passent)
+- 📊 **Couverture globale** : 89.13%
+- 🧪 **Tests unitaires** : Tests des controllers et middlewares
+- 🔗 **Tests d'intégration** : Tests des routes complètes
 
 ### Structure des tests
 
@@ -341,12 +349,22 @@ Book-Api/
 │   ├── integration/           # Tests d'intégration
 │   └── setup.js               # Configuration des tests
 │
+├── migrations/                # Migrations Sequelize
+│   ├── 001-create-users.js
+│   ├── 002-create-books.js
+│   └── 003-create-book-likes.js
+│
+├── scripts/                   # Scripts utilitaires
+│   └── migrate.js             # Script d'exécution des migrations
+│
 ├── logs/                      # Fichiers de logs (générés automatiquement)
 │   ├── error.log              # Logs d'erreurs
 │   └── combined.log           # Tous les logs
 │
 ├── .env.example               # Template des variables d'environnement
 ├── .gitignore                 # Fichiers ignorés par Git
+├── Dockerfile                 # Configuration Docker
+├── docker-compose.yml         # Configuration Docker Compose
 ├── index.js                   # Point d'entrée de l'application
 ├── jest.config.js             # Configuration Jest
 ├── package.json               # Dépendances et scripts
@@ -403,6 +421,17 @@ Book-Api/
 2. Utilisez un `JWT_SECRET` fort et unique
 3. Configurez `NODE_ENV=production`
 4. Vérifiez que le dossier `logs/` est accessible en écriture
+5. Exécutez les migrations : `npm run migrate`
+
+### Déploiement avec Docker
+
+```bash
+# Construire l'image
+docker build -t book-api .
+
+# Lancer avec docker-compose
+docker-compose up -d
+```
 
 ### Recommandations
 

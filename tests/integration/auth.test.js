@@ -28,7 +28,7 @@ describe('Routes d\'authentification', () => {
         .send({
           name: 'Test User',
           email: 'test@example.com',
-          password: 'password123',
+          password: 'Password123',
         });
 
       expect(response.status).toBe(201);
@@ -66,7 +66,7 @@ describe('Routes d\'authentification', () => {
         .send({
           name: 'New User',
           email: 'existing@example.com',
-          password: 'password123',
+          password: 'Password123',
         });
 
       expect(response.status).toBe(409);
@@ -78,7 +78,7 @@ describe('Routes d\'authentification', () => {
     beforeEach(async () => {
       // Créer un utilisateur de test
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      const hashedPassword = await bcrypt.hash('Password123', 10);
       await User.create({
         name: 'Test User',
         email: 'test@example.com',
@@ -91,7 +91,7 @@ describe('Routes d\'authentification', () => {
         .post('/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'password123',
+          password: 'Password123',
         });
 
       expect(response.status).toBe(200);
@@ -106,7 +106,7 @@ describe('Routes d\'authentification', () => {
         .post('/auth/login')
         .send({
           email: 'wrong@example.com',
-          password: 'password123',
+          password: 'Password123',
         });
 
       expect(response.status).toBe(401);

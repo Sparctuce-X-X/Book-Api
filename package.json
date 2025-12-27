@@ -7,15 +7,18 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "migrate": "node scripts/migrate.js"
   },
   "keywords": [
     "node",
     "express",
-    "mongodb",
+    "sqlite",
+    "sequelize",
     "jwt",
     "books",
-    "api"
+    "api",
+    "rest"
   ],
   "author": "",
   "license": "MIT",

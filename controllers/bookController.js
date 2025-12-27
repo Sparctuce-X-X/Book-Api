@@ -1,6 +1,7 @@
 // CRUD complet pour les livres
 const Joi = require('joi');
 const Book = require('../models/Book');
+const BookLike = require('../models/BookLike');
 
 // Schéma de validation pour créer un livre
 const bookSchema = Joi.object({
@@ -215,11 +216,12 @@ module.exports = {
   // ============================================
   // LIKE - Liker un livre
   // POST /books/:id/like
-  // Incrémente le compteur de likes
+  // Ajoute un like si l'utilisateur ne l'a pas déjà liké
   // ============================================
   likeBook: async (req, res, next) => {
     try {
       const { id } = req.params;
+      const userId = req.user.id;
 
       const book = await Book.findByPk(id);
 
@@ -227,7 +229,28 @@ module.exports = {
         return res.status(404).json({ message: 'Livre non trouvé' });
       }
 
-      // Incrémente le compteur de likes
+      // Vérifier si l'utilisateur a déjà liké ce livre
+      const existingLike = await BookLike.findOne({
+        where: {
+          userId,
+          bookId: id,
+        },
+      });
+
+      if (existingLike) {
+        return res.status(409).json({
+          message: 'Vous avez déjà liké ce livre',
+          likesCount: book.likesCount,
+        });
+      }
+
+      // Créer le like
+      await BookLike.create({
+        userId,
+        bookId: id,
+      });
+
+      // Incrémenter le compteur de likes
       book.likesCount += 1;
       await book.save();
 
@@ -236,6 +259,12 @@ module.exports = {
         likesCount: book.likesCount,
       });
     } catch (err) {
+      // Gérer l'erreur de contrainte unique (au cas où)
+      if (err.name === 'SequelizeUniqueConstraintError') {
+        return res.status(409).json({
+          message: 'Vous avez déjà liké ce livre',
+        });
+      }
       next(err);
     }
   },

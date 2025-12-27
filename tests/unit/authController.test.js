@@ -21,7 +21,7 @@ describe('AuthController', () => {
         body: {
           name: 'Test User',
           email: 'test@example.com',
-          password: 'password123',
+          password: 'Password123',
         },
       };
       const res = {
@@ -43,7 +43,7 @@ describe('AuthController', () => {
       await authController.register(req, res, next);
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
-      expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith('Password123', 10);
       expect(User.create).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
@@ -58,7 +58,7 @@ describe('AuthController', () => {
         body: {
           name: 'Test User',
           email: 'existing@example.com',
-          password: 'password123',
+          password: 'Password123',
         },
       };
       const res = {
@@ -105,7 +105,7 @@ describe('AuthController', () => {
       const req = {
         body: {
           email: 'test@example.com',
-          password: 'password123',
+          password: 'Password123',
         },
       };
       const res = {
@@ -129,7 +129,7 @@ describe('AuthController', () => {
       await authController.login(req, res, next);
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
-      expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedPassword');
+      expect(bcrypt.compare).toHaveBeenCalledWith('Password123', 'hashedPassword');
       expect(jwt.sign).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
@@ -144,7 +144,7 @@ describe('AuthController', () => {
       const req = {
         body: {
           email: 'nonexistent@example.com',
-          password: 'password123',
+          password: 'Password123',
         },
       };
       const res = {

@@ -15,11 +15,17 @@ const registerSchema = Joi.object({
     'string.email': 'L\'email doit être une adresse email valide',
     'any.required': 'L\'email est requis',
   }),
-  password: Joi.string().min(8).max(128).required().messages({
-    'string.min': 'Le mot de passe doit contenir au moins 8 caractères',
-    'string.max': 'Le mot de passe ne peut pas dépasser 128 caractères',
-    'any.required': 'Le mot de passe est requis',
-  }),
+  password: Joi.string()
+    .min(8)
+    .max(128)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .required()
+    .messages({
+      'string.min': 'Le mot de passe doit contenir au moins 8 caractères',
+      'string.max': 'Le mot de passe ne peut pas dépasser 128 caractères',
+      'string.pattern.base': 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre',
+      'any.required': 'Le mot de passe est requis',
+    }),
 });
 
 const loginSchema = Joi.object({

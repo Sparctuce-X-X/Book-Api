@@ -6,6 +6,7 @@ const app = require('../../index');
 const { sequelize } = require('../../config/database');
 const User = require('../../models/User');
 const Book = require('../../models/Book');
+const BookLike = require('../../models/BookLike');
 const jwt = require('jsonwebtoken');
 
 describe('Routes de livres', () => {
@@ -24,12 +25,13 @@ describe('Routes de livres', () => {
 
   beforeEach(async () => {
     // Nettoyer les données
+    await BookLike.destroy({ where: {}, truncate: true });
     await Book.destroy({ where: {}, truncate: true });
     await User.destroy({ where: {}, truncate: true });
 
     // Créer un utilisateur normal
     const bcrypt = require('bcryptjs');
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash('Password123', 10);
     const user = await User.create({
       name: 'Test User',
       email: 'user@example.com',
@@ -226,7 +228,7 @@ describe('Routes de livres', () => {
     it('devrait retourner 403 si l\'utilisateur n\'est pas le propriétaire', async () => {
       // Créer un autre utilisateur
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      const hashedPassword = await bcrypt.hash('Password123', 10);
       const otherUser = await User.create({
         name: 'Other User',
         email: 'other@example.com',
@@ -299,6 +301,22 @@ describe('Routes de livres', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('likesCount', 1);
+      expect(response.body).toHaveProperty('message', 'Like ajouté');
+    });
+
+    it('devrait retourner 409 si l\'utilisateur a déjà liké le livre', async () => {
+      // Premier like
+      await request(app)
+        .post(`/books/${bookId}/like`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      // Deuxième like (devrait échouer)
+      const response = await request(app)
+        .post(`/books/${bookId}/like`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(409);
+      expect(response.body).toHaveProperty('message', 'Vous avez déjà liké ce livre');
     });
   });
 });
